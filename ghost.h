@@ -16,7 +16,6 @@ class Ghost : public Enemy
 {
 
 private:
-    bool _isDestroyed = false; // Indicates if ghost is destroyed
 
     // Helper methods for ghost movement !
     void changeDirection(); // Change ghost direction
@@ -31,9 +30,6 @@ public:
     virtual void move() override; // Implement ghost movement logic
     virtual void reset() override; // Reset ghost to initial state
 
-    // Self functions
-    void setStatus(bool status) { _isDestroyed = status; }
-    bool isDestroyed() const { return _isDestroyed; }
 
 
 };

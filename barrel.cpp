@@ -45,7 +45,7 @@ void Barrel::move() // Move Barrel
 
 void Barrel::explosion()
 {
-    _exploded = true;
+    _isDestroyed = true;
 
     Point newPosition; // Barrel's new position
 

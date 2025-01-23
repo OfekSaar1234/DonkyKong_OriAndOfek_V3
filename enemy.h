@@ -12,11 +12,13 @@ private:
 protected:
     GameConfig::Direction _dir; // Current direction of movement
     Map* _pMap = nullptr; // Pointer to the map object
+    bool _isDestroyed = false; // status of enemy
+
     void draw(char ch) const; // Protected method to draw the enemy
 
 public:
 
-    Enemy(const Point& startPos, const GameConfig::Direction dir) : _startPos(startPos), _position(startPos), _dir(dir) {}
+    Enemy(const Point& startPos, const GameConfig::Direction dir) : _startPos(startPos), _position(startPos), _dir(dir), _pMap(nullptr), _isDestroyed(false) {}
 
     virtual ~Enemy() = default; // Virtual destructor !
 
@@ -32,6 +34,8 @@ public:
     void setMap(Map& map) { _pMap = &map; } // Set the map reference
     bool gotHit() const; // Check if the enemy was hit
     bool HitEdge() const; // Check if enemy hit an edge
+    bool isDestroyed() const { return _isDestroyed; }; // check if enemy is destroyed
+    void setStatus(bool status) { _isDestroyed = status; }
 
 
     // virtual functions !

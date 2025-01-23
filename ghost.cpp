@@ -24,9 +24,11 @@ void Ghost::move()
             _dir = { 1, 0 }; // our def movement of ghost is right
         }
 
-        if (!_pMap->isFloor(nextCharBelow) || _pMap->getCharCurrentMap(newPosition) == (char)GameConfig::utilKeys::GHOST ||
+        if (_pMap->getCharCurrentMap(newPosition) == (char)GameConfig::utilKeys::GHOST ||
             _pMap->getCharCurrentMap(newFurtherPosition) == (char)GameConfig::utilKeys::GHOST ||
-            _pMap->isEdge(newPosition) || _pMap->isFloor(newPosition)) // If ghost encounters an obstacle (no floor or another ghost), change direction
+            _pMap->getCharCurrentMap(newPosition) == (char)GameConfig::utilKeys::SMART_GHOST ||
+            _pMap->getCharCurrentMap(newFurtherPosition) == (char)GameConfig::utilKeys::SMART_GHOST ||
+            !_pMap->isFloor(nextCharBelow) || _pMap->isEdge(newPosition) || _pMap->isFloor(newPosition)) // If ghost encounters an obstacle (no floor or another ghost), change direction
         {
             changeDirection(); // Change direction if necessary (hit wall or another ghost)
         }

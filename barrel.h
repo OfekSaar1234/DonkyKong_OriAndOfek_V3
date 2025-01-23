@@ -11,7 +11,6 @@ class Barrel : public Enemy
 {
 private:
     int _count_falling = 0; // Counter for falling steps
-    bool _exploded = false; // Flag to indicate if barrel has exploded
 
 public:
 
@@ -25,5 +24,4 @@ public:
     // Additional methods specific to Barrel ! 
     void explosion(); // Trigger barrel explosion
     void clearExplosion(); // Clear explosion effects
-    bool isExploded() const { return _exploded; } // Check if barrel has exploded
 };

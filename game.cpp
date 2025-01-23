@@ -165,18 +165,10 @@ void Game::run()
                             // Draw active barrels and ghosts
                             for (const auto& enemy : enemies)
                             {
-                                if (typeid(*enemy) == typeid(Ghost)) // if this enemy is a ghost
+                                if (!enemy->isDestroyed()) // if this enemy isn't destroyed
                                 {
-                                    if (!((Ghost*)enemy)->isDestroyed()) // if ghost isn't destroyed
-                                        enemy->draw();
-                                }
-                                else if (typeid(*enemy) == typeid(SmartGhost)) // if this enemy is a smart ghost
-                                {
-                                    if (!((SmartGhost*)enemy)->isDestroyed()) // if smart ghost isn't destroyed
-                                        enemy->draw();
-                                }
-                                else // it's a Barrel
                                     enemy->draw();
+                                }
                             }
                         }
                         continue;
@@ -193,18 +185,10 @@ void Game::run()
                     // Draw active barrels and ghosts
                     for (const auto& enemy : enemies)
                     {
-                        if (typeid(*enemy) == typeid(Ghost)) // if this enemy is a ghost
+                        if (!enemy->isDestroyed()) // if this enemy isn't destroyed
                         {
-                            if (!((Ghost*)enemy)->isDestroyed()) // if ghost isn't destroyed
-                                enemy->draw();
-                        }
-                        else if (typeid(*enemy) == typeid(SmartGhost)) // if this enemy is a smart ghost
-                        {
-                            if (!((SmartGhost*)enemy)->isDestroyed()) // if smart ghost isn't destroyed
-                                enemy->draw();
-                        }
-                        else // it's a Barrel
                             enemy->draw();
+                        }
                     }
 
                     mario.draw(); // Draw Mario
@@ -229,24 +213,22 @@ void Game::run()
                         else if (enemy->gotHit()) // if enemy got hit by mario's hammer
                         {
                             enemy->erase(); // erases enemy from screen
+
                             if (barrel) // if enemy is a Barrel
                             {
                                 delete enemy;// Free memory
                                 enemies.erase(enemies.begin() + i); // Remove from vector
                             }
-                            else if (typeid(*enemy) == typeid(Ghost)) // enemy is a Ghost
+                            else // enemy is a Ghost / SmartGhost
                             {
-                                ((Ghost*)enemy)->setStatus(true);
+                                enemy->setStatus(true);
                             }
-                            else if (typeid(*enemy) == typeid(SmartGhost)) // enemy is a SmartGhost
-                            {
-                                ((SmartGhost*)enemy)->setStatus(true);
-                            }
+                            
                             _score += 1;// Increase score
                             _scoreChange = true; // Mark score for redrawing
                             ++i; // Continue to the next enemy
                         }
-                        else if (barrel && barrel->isExploded()) // if it's a barrel if it got exploded
+                        else if (barrel && barrel->isDestroyed()) // if it's a barrel if it got exploded
                         {
                             barrel->clearExplosion();
                             delete barrel;// Free memory
@@ -264,18 +246,10 @@ void Game::run()
                     // Move enemy
                     for (const auto& enemy : enemies)
                     {
-                        if (typeid(*enemy) == typeid(Ghost)) // if this enemy is a ghost
+                        if (!enemy->isDestroyed()) // if this enemy is a ghost
                         {
-                            if (!((Ghost*)enemy)->isDestroyed()) // if ghost isn't destroyed
-                                enemy->move();
-                        }
-                        else if (typeid(*enemy) == typeid(SmartGhost)) // if this enemy is a smart ghost
-                        {
-                            if (!((SmartGhost*)enemy)->isDestroyed()) // if smart ghost isn't destroyed
-                                enemy->move();
-                        }
-                        else // it's a Barrel
                             enemy->move();
+                        }
                     }
 
                     mario.move(); // Move Mario
@@ -617,7 +591,7 @@ void Game::resetStage(vector<Enemy*>& enemies, Mario* pMario, Map* pMap, Hammer*
 
         if (barrel) // if enemy is a barrel
         {
-            if(barrel->isExploded()) // if the barrel is exploded
+            if(barrel->isDestroyed()) // if the barrel is exploded
                 barrel->clearExplosion(); // Clear explosion from the map
 
             barrel->reset();
