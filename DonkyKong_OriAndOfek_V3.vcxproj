@@ -129,7 +129,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="barrel.cpp" />
-    <ClCompile Include="DonkyKong_OriAndOfek_V3.cpp" />
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="enemy.cpp" />
     <ClCompile Include="game.cpp" />
     <ClCompile Include="general.cpp" />
