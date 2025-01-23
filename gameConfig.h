@@ -13,7 +13,7 @@ public:
     static constexpr int MOVE_DELAY = 78;
 
     // Utility keys enum
-    enum class utilKeys { SPACE = ' ', LADDER = 'H', FLOOR = '=', LFLOOR = '<', RFLOOR = '>', MARIO = '@', BARREL = 'O', GHOST = 'x', EDGE = 'Q', EXPLOSION = '*', PAULINE = '$', HAMMER = 'p', DKONG = '&', LIFE = 'L', SMASH = '~', ESC = 27, SMARTGHOST = 'X' };
+    enum class utilKeys { SPACE = ' ', LADDER = 'H', FLOOR = '=', LFLOOR = '<', RFLOOR = '>', MARIO = '@', BARREL = 'O', GHOST = 'x', SMART_GHOST = 'X', EDGE = 'Q', EXPLOSION = '*', PAULINE = '$', HAMMER = 'p', DKONG = '&', LIFE = 'L', SMASH = '~', ESC = 27};
 
     // Movement keys enum
     enum class movementKeys { LEFT = 'a', RIGHT = 'd', UP = 'w', DOWN = 'x', STAY = 's', HIT = 'p' };

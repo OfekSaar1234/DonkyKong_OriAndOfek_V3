@@ -42,6 +42,9 @@
     <ClCompile Include="mario.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="smartGhost.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="barrel.h">
@@ -72,6 +75,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="point.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="smartGhost.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -137,6 +137,7 @@
     <ClCompile Include="hammer.cpp" />
     <ClCompile Include="map.cpp" />
     <ClCompile Include="mario.cpp" />
+    <ClCompile Include="smartGhost.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="barrel.h" />
@@ -149,6 +150,7 @@
     <ClInclude Include="map.h" />
     <ClInclude Include="mario.h" />
     <ClInclude Include="point.h" />
+    <ClInclude Include="smartGhost.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

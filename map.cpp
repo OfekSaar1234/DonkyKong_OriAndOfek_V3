@@ -26,7 +26,7 @@ bool Map::load(const string& filename)
 				if (curr_col < GameConfig::GAME_WIDTH)
 				{
 					// If there are missing columns, add spaces
-#pragma warning(suppress : 4996) // Suppress warning for strcpy
+					#pragma warning(suppress : 4996) // Suppress warning for strcpy
 					strcpy(_originalMap[curr_row] + curr_col, string(GameConfig::GAME_WIDTH - curr_col, ' ').c_str());
 				}
 				++curr_row;  // Move to the next row
@@ -62,6 +62,11 @@ bool Map::load(const string& filename)
 				else if (c == (char)GameConfig::utilKeys::GHOST)
 				{
 					_ghostPositions.push_back({ curr_col, curr_row }); // Store the position of Ghost
+					_originalMap[curr_row][curr_col++] = ' '; // Replace Ghost's position with a space
+				}
+				else if (c == (char)GameConfig::utilKeys::SMART_GHOST)
+				{
+					_smartGhostPositions.push_back({ curr_col, curr_row }); // Store the position of Ghost
 					_originalMap[curr_row][curr_col++] = ' '; // Replace Ghost's position with a space
 				}
 				// Check if the character is Donkey Kong
@@ -124,12 +129,12 @@ bool Map::load(const string& filename)
 			// Fill the rows up to the game height with spaces
 			for (int row = last_row + 1; row < GameConfig::GAME_HEIGHT; ++row)
 			{
-#pragma warning(suppress : 4996) // Suppress warning for strcpy
+				#pragma warning(suppress : 4996) // Suppress warning for strcpy
 				strcpy(_originalMap[row], string(GameConfig::GAME_WIDTH, ' ').c_str());
 			}
 
 			// Place the floor row below the game height (not visible to the user)
-#pragma warning(suppress : 4996) // Suppress warning for strcpy
+			#pragma warning(suppress : 4996) // Suppress warning for strcpy
 			strcpy(_originalMap[GameConfig::GAME_HEIGHT], string(GameConfig::GAME_WIDTH, '=').c_str());
 		}
 

@@ -80,9 +80,7 @@ void Game::run()
             map.drawLife(map.getLPosition(), mario.getLife()); // Draw Mario's life count on the map
             map.drawScore(map.getLPosition(), _score); // Draw score on the map
 
-            //vector<Enemy*> enemies;
-
-            vector<Barrel> barrels; // Vector to store barrels
+            vector<Enemy*> enemies;
 
             Hammer hammer; // Create a Hammer object
             hammer.setMap(map); // Set map for the hammer
@@ -104,24 +102,22 @@ void Game::run()
 
             // Initialize ghosts
             vector<Point> ghostPos = map.getGhostPositions();
-            vector<Ghost> ghosts;
 
-            /*for (const auto& pos : map.getGhostPositions())
+            // Initialize smart ghosts
+            vector<Point> smartGhostsPos = map.getSmartGhostPositions();
+
+            for (const auto& pos : ghostPos)
             {
                 Ghost* ghost = new Ghost(pos);
                 ghost->setMap(map);
                 enemies.push_back(ghost);
-            }*/
-
-            for (auto& pos : ghostPos)
-            {
-                ghosts.emplace_back(pos); // Create ghosts directly in the vector
             }
 
-            // Set map for each ghost
-            for (auto& ghost : ghosts)
+            for (const auto& pos : smartGhostsPos)
             {
-                ghost.setMap(map);
+                SmartGhost* smartGhost = new SmartGhost(pos);
+                smartGhost->setMap(map);
+                enemies.push_back(smartGhost);
             }
 
             isPaused = false; // Ensure game is not paused at the start
@@ -167,24 +163,21 @@ void Game::run()
                             mario.draw(); // Redraw Mario
 
                             // Draw active barrels and ghosts
-                            for (int i = 0; i < barrels.size(); i++)
+                            for (const auto& enemy : enemies)
                             {
-                                barrels[i].draw();
-                            }
-
-                            for (auto& ghost : ghosts)
-                            {
-                                if (!ghost.isDestroyed())
+                                if (typeid(*enemy) == typeid(Ghost)) // if this enemy is a ghost
                                 {
-                                    ghost.draw();
+                                    if (!((Ghost*)enemy)->isDestroyed()) // if ghost isn't destroyed
+                                        enemy->draw();
                                 }
-                            }
-                            /*for (const auto& enemy : enemies)
-                            {
-                                if (!enemy->isDestroyed())
+                                else if (typeid(*enemy) == typeid(SmartGhost)) // if this enemy is a smart ghost
+                                {
+                                    if (!((SmartGhost*)enemy)->isDestroyed()) // if smart ghost isn't destroyed
+                                        enemy->draw();
+                                }
+                                else // it's a Barrel
                                     enemy->draw();
-                            }*/
-
+                            }
                         }
                         continue;
                     }
@@ -197,158 +190,109 @@ void Game::run()
 
                 if (!isPaused) // Game is running, proceed with game logic
                 {
-                    /*for (const auto& enemy : enemies)
-                    {
-                        if (!enemy->isDestroyed())
-                            enemy->draw();
-                    }*/
                     // Draw active barrels and ghosts
-                    for (int i = 0; i < barrels.size(); i++)
+                    for (const auto& enemy : enemies)
                     {
-                        barrels[i].draw();
-                    }
-
-                    for (auto& ghost : ghosts)
-                    {
-                        if (!ghost.isDestroyed())
+                        if (typeid(*enemy) == typeid(Ghost)) // if this enemy is a ghost
                         {
-                            ghost.draw();
+                            if (!((Ghost*)enemy)->isDestroyed()) // if ghost isn't destroyed
+                                enemy->draw();
                         }
+                        else if (typeid(*enemy) == typeid(SmartGhost)) // if this enemy is a smart ghost
+                        {
+                            if (!((SmartGhost*)enemy)->isDestroyed()) // if smart ghost isn't destroyed
+                                enemy->draw();
+                        }
+                        else // it's a Barrel
+                            enemy->draw();
                     }
 
                     mario.draw(); // Draw Mario
 
                     Sleep(GameConfig::MOVE_DELAY); // Delay for smooth movement
 
-                    // Handle barrel and ghost actions
-                    for (int i = barrels.size() - 1; i >= 0; --i) // Iterate backward
+                    // handles enemy's actions
+
+                    for (size_t i = 0; i < enemies.size();)
                     {
-                        if (barrels[i].isExploded())
+                        Enemy* enemy = enemies[i];
+
+                        // Check if the enemy is a barrel, if it's a barrel, cast the pointer to Barrel*, else return nullptr
+                        Barrel* barrel = dynamic_cast<Barrel*>(enemy);
+
+                        if (barrel && barrel->HitEdge()) // if enemy hits the edge
                         {
-                            barrels[i].clearExplosion();
-                            barrels.erase(barrels.begin() + i);
+                            barrel->erase();// Erase barrel from screen
+                            delete barrel;// Free memory
+                            enemies.erase(enemies.begin() + i); // Remove from vector
                         }
-                        else if (barrels[i].gotHit())
+                        else if (enemy->gotHit()) // if enemy got hit by mario's hammer
                         {
-                            _score += 1;
-                            _scoreChange = true;
-                            barrels.erase(barrels.begin() + i);
+                            enemy->erase(); // erases enemy from screen
+                            if (barrel) // if enemy is a Barrel
+                            {
+                                delete enemy;// Free memory
+                                enemies.erase(enemies.begin() + i); // Remove from vector
+                            }
+                            else if (typeid(*enemy) == typeid(Ghost)) // enemy is a Ghost
+                            {
+                                ((Ghost*)enemy)->setStatus(true);
+                            }
+                            else if (typeid(*enemy) == typeid(SmartGhost)) // enemy is a SmartGhost
+                            {
+                                ((SmartGhost*)enemy)->setStatus(true);
+                            }
+                            _score += 1;// Increase score
+                            _scoreChange = true; // Mark score for redrawing
+                            ++i; // Continue to the next enemy
                         }
-                        else if (barrels[i].HitEdge())
+                        else if (barrel && barrel->isExploded()) // if it's a barrel if it got exploded
                         {
-                            barrels[i].erase();
-                            barrels.erase(barrels.begin() + i);
+                            barrel->clearExplosion();
+                            delete barrel;// Free memory
+                            enemies.erase(enemies.begin() + i); // Remove from vector
                         }
                         else
                         {
-                            barrels[i].erase();
+                            enemy->erase();// Erase for movement effect
+                            ++i;// Continue to the next enemy
                         }
                     }
-
-                    // Handle ghost actions
-                    for (auto& ghost : ghosts)
-                    {
-                        if (!ghost.isDestroyed())
-                        {
-                            if (ghost.gotHit()) // If ghost was hit
-                            {
-                                _score += 1; // Increase score
-                                _scoreChange = true; // Flag to redraw score// we redrawing only when the score changing to minimize the redrawing
-                                ghost.setStatus(true); // Mark ghost as destroyed
-                            }
-                            ghost.erase(); // Erase ghost (for movement effect)
-                        }
-                    }
-
-                    //for (size_t i = 0; i < enemies.size();)
-                    //{
-                    //    Enemy* enemy = enemies[i];
-
-                    //    // Check if the enemy is a barrel
-                    //    Barrel* barrel = dynamic_cast<Barrel*>(enemy);
-
-                    //    if (barrel && barrel->HitEdge())
-                    //    {
-                    //        barrel->erase();// Erase barrel from screen
-                    //        delete barrel;// Free memory
-                    //        enemies.erase(enemies.begin() + i); // Remove from vector
-                    //    }
-
-                    //    // General logic for all enemies
-                    //    else if (enemy->gotHit())
-                    //    {
-                    //        if (!barrel)
-                    //        {
-                    //            enemy->setStatus(true);
-                    //        }
-                    //        else // u r barrel
-                    //        {
-                    //            barrel->erase();// Erase barrel from screen
-                    //            delete enemy;// Free memory
-                    //            enemies.erase(enemies.begin() + i); // Remove from vector
-                    //        }
-                    //        _score += 1;// Increase score
-                    //        _scoreChange = true; // Mark score for redrawing
-                    //    }
-
-                    //    // Barrel-specific logic
-                    //    else if (barrel && barrel->isExploded())
-                    //    {
-                    //        barrel->clearExplosion();
-                    //        delete barrel;// Free memory
-                    //        enemies.erase(enemies.begin() + i); // Remove from vector
-                    //    }
-
-                    //    else
-                    //    {
-                    //        enemy->erase();// Erase for movement effect
-                    //        ++i;// Increment if not erased
-                    //    }
-                    //}
 
                     mario.erase(); // Erase Mario from the map
 
                     // Move enemy
-                    /*for (const auto& enemy : enemies)
+                    for (const auto& enemy : enemies)
                     {
-                        if (!enemy->isDestroyed())
-                            enemy->move();
-                    }*/
-                    for (int i = 0; i < barrels.size(); i++)
-                    {
-                        barrels[i].move(); // Move barrel
-                    }
-
-                    for (auto& ghost : ghosts)
-                    {
-                        if (!ghost.isDestroyed())
+                        if (typeid(*enemy) == typeid(Ghost)) // if this enemy is a ghost
                         {
-                            ghost.move(); // Move ghost
+                            if (!((Ghost*)enemy)->isDestroyed()) // if ghost isn't destroyed
+                                enemy->move();
                         }
+                        else if (typeid(*enemy) == typeid(SmartGhost)) // if this enemy is a smart ghost
+                        {
+                            if (!((SmartGhost*)enemy)->isDestroyed()) // if smart ghost isn't destroyed
+                                enemy->move();
+                        }
+                        else // it's a Barrel
+                            enemy->move();
                     }
 
                     mario.move(); // Move Mario
 
                     set_gameLoop(gameLoop + 1); // Increment game loop counter
 
-                    if (gameLoop >= GameConfig::LOOPS_FOR_BARREL) // Add a new barrel after a certain number of loops
+                    if (gameLoop >= GameConfig::LOOPS_FOR_BARREL)
                     {
-                        barrels.emplace_back(barrelPosition); // Add barrels to the vector
-                        barrels[barrels.size() - 1].setMap(map); // set map to barrel
-                        set_gameLoop(0); // Reset game loop counter
+                        Barrel* barrel = new Barrel(barrelPosition);
+                        barrel->setMap(map);
+                        enemies.push_back(barrel); // Add barrel to enemies vector
+                        set_gameLoop(0);           // Reset game loop counter
                     }
-
-                    //if (gameLoop >= GameConfig::LOOPS_FOR_BARREL)
-                    //{
-                    //    Barrel* barrel = new Barrel(barrelPosition);
-                    //    barrel->setMap(map);
-                    //    enemies.push_back(barrel); // Add barrel to enemies
-                    //    set_gameLoop(0);           // Reset game loop counter
-                    //}
 
                     if (mario.getLifeStatus()) // If Mario died
                     {
-                        resetStage(ghosts, barrels, &mario, &map, &hammer); // Reset stage
+                        resetStage(enemies, &mario, &map, &hammer); // Reset stage
                     }
 
                     if (mario.getHammerStatus()) // If Mario has a hammer
@@ -394,11 +338,12 @@ void Game::run()
                     nextLevelScreen(); // Show next level screen
                 }
             }
-            //// delete all objects from container 
-            //for (const auto& enemy : enemies)
-            //{
-            //    delete enemy;
-            //}
+
+            // delete all objects from container 
+            for (const auto& enemy : enemies)
+            {
+                delete enemy;
+            }
         }
         else // If the map fails to load
         {
@@ -660,25 +605,32 @@ void Game::nextLevelScreen()
     _ch = _getch();
 }
 
-void Game::resetStage(vector<Ghost>& Ghosts, vector<Barrel>& pBarrels, Mario* pMario, Map* pMap, Hammer* pHammer)
+void Game::resetStage(vector<Enemy*>& enemies, Mario* pMario, Map* pMap, Hammer* pHammer)
 {
-
-    // Reset all active barrels
-    for (int i = 0; i < pBarrels.size(); ++i)
+    // Resets all enemies, erasing the barrels from the map and deleting them from the vector, and reseting the ghosts to their starting positions
+    for (size_t i = 0; i < enemies.size();)
     {
-        if (pBarrels[i].isExploded()) // Check if barrel exploded
+        Enemy* enemy = enemies[i];
+
+        // Check if the enemy is a barrel, if it's a barrel, cast the pointer to Barrel*, otherwise return nullptr
+        Barrel* barrel = dynamic_cast<Barrel*>(enemy);
+
+        if (barrel) // if enemy is a barrel
         {
-            pBarrels[i].clearExplosion(); // Clear explosion from the map
-        }
-        pBarrels[i].reset(); // Reset the barrel to its starting position
-    }
-    pBarrels.clear();
+            if(barrel->isExploded()) // if the barrel is exploded
+                barrel->clearExplosion(); // Clear explosion from the map
 
-    // Reset all ghosts to their initial positions
-    for (auto& ghost : Ghosts)
-    {
-        ghost.reset(); // Reset each ghost's state
+            barrel->reset();
+            delete barrel;
+            enemies.erase(enemies.begin() + i);
+        }
+        else // it's a ghost / smart ghost
+        {
+            enemy->reset();
+            ++i;
+        }
     }
+
 
     // Reset the hammer object to its initial state
     pHammer->reset();

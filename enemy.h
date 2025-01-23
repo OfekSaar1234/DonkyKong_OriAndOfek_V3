@@ -12,7 +12,6 @@ private:
 protected:
     GameConfig::Direction _dir; // Current direction of movement
     Map* _pMap = nullptr; // Pointer to the map object
-    bool _isDestroyed = false; // Indicates if the enemy is destroyed
     void draw(char ch) const; // Protected method to draw the enemy
 
 public:
@@ -27,7 +26,6 @@ public:
     Point getPos() const { return _position; }
     void setStartPos(const Point& point) { _startPos = point; }
     void setPosition(const Point& point) { _position = point; }
-    void setStatus(bool status) { _isDestroyed = status; }
 
     // Common methods for all enemies
     void erase() const; // Erase the enemy from the screen
@@ -40,6 +38,4 @@ public:
     virtual void move() = 0; // Move the enemy
     virtual void draw() const = 0; // Draw the enemy
     virtual void reset() = 0; // Reset the enemy to its initial state
-    virtual bool isDestroyed() const = 0; // Check if the enemy is destroyed
-
 };

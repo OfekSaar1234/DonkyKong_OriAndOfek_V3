@@ -29,6 +29,7 @@ private:
     Point _marioPosition; // Position of Mario
     Point _hammerPosition; // Position of the hammer
     vector<Point> _ghostPositions; // Positions of ghosts
+    vector<Point> _smartGhostPositions; // Position of Smart Ghosts
 
 public:
     Map() : _lifePosition({ -1, -1 }), _dkongPosition({ -1, -1 }), _paulinePosition({ -1, -1 }), _marioPosition({ -1, -1 }), _useColors(false) {} // Constructor initializes positions to invalid!!! state
@@ -66,4 +67,5 @@ public:
     Point getMarioPosition() const { return _marioPosition; } // Get Mario position
     Point getHammerPosition() const { return _hammerPosition; } // Get hammer position
     vector<Point> getGhostPositions() const { return _ghostPositions; } // Get ghost positions
+    vector<Point> getSmartGhostPositions() const { return _smartGhostPositions; } // Get ghost positions
 };

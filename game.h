@@ -2,6 +2,7 @@
 #include "mario.h" // Mario class header
 #include "barrel.h" // Barrel class header
 #include "ghost.h" // Ghost class header
+#include "smartGhost.h" // SmartGhost class header
 #include "enemy.h" // Base class for enemies
 
 #include <iostream> // For input and output operations
@@ -44,10 +45,7 @@ public:
     Game& operator=(const Game&) = delete; // Deletes the copy assignment operator
 
     void menu(); // Displays the menu
-    void resetStage(vector<Ghost>& Ghosts, vector<Barrel>& pBarrel, Mario* pMario, Map* pMap, Hammer* pHammer); // Resets the stage (resets Mario, barrels, ghosts, map, and hammer)
-    //void resetStage(vector<Enemy*>& enemies, Mario* pMario, Map* pMap, Hammer* pHammer);
-
+    void resetStage(vector<Enemy*>& enemies, Mario* pMario, Map* pMap, Hammer* pHammer); // Resets the stage (resets Mario, enemies, map, and hammer)
     int get_gameLoop() const { return _gameLoop; } // Returns the game loop counter
-
     void set_gameLoop(int x) { _gameLoop = x; } // Sets the game loop counter
 };

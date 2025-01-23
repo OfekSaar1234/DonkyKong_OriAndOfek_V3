@@ -1,4 +1,5 @@
 #pragma once
+
 #include <cstdlib> // For rand()
 #include "gameConfig.h" // Game configuration and constants
 #include <vector> // For vector container
@@ -11,12 +12,11 @@ using namespace std;
 class Map; // Forward declaration
 class Point; // Forward declaration
 
-
-class Ghost : public Enemy
+class SmartGhost: public Enemy
 {
 
 private:
-    bool _isDestroyed = false; // Indicates if ghost is destroyed
+    bool _isDestroyed = false; // Indicates if SmartGhost is destroyed
 
     // Helper methods for ghost movement !
     void changeDirection(); // Change ghost direction
@@ -24,10 +24,10 @@ private:
 
 public:
     // Constructor
-    Ghost(const Point& startPos) : Enemy(startPos, { 1, 0 }) {}
+    SmartGhost(const Point& startPos) : Enemy(startPos, { 1, 0 }) {}
 
     // Override virtual functions from Enemy class !
-    virtual void draw() const override { Enemy::draw((char)GameConfig::utilKeys::GHOST); }
+    virtual void draw() const override { Enemy::draw((char)GameConfig::utilKeys::SMART_GHOST); }
     virtual void move() override; // Implement ghost movement logic
     virtual void reset() override; // Reset ghost to initial state
 
@@ -35,5 +35,5 @@ public:
     void setStatus(bool status) { _isDestroyed = status; }
     bool isDestroyed() const { return _isDestroyed; }
 
-
 };
+

@@ -21,7 +21,6 @@ public:
     virtual void draw() const override { Enemy::draw((char)GameConfig::utilKeys::BARREL); }
     virtual void move() override; // Implement barrel movement logic
     virtual void reset() override; // Reset barrel to initial state
-    virtual bool isDestroyed() const override { return _isDestroyed; }
 
     // Additional methods specific to Barrel ! 
     void explosion(); // Trigger barrel explosion
