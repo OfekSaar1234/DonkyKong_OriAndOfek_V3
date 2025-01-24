@@ -27,8 +27,8 @@ public:
 
     // Override virtual functions from Enemy class !
     virtual void draw() const override { Enemy::draw((char)GameConfig::utilKeys::SMART_GHOST); }
-    virtual void move() override; // Implement ghost movement logic
-    virtual void reset() override; // Reset ghost to initial state
+    virtual void move() override; // Implement smart ghost movement logic
+    virtual void reset() override; // Reset smart ghost to initial state
 
 };
 

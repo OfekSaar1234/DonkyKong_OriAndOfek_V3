@@ -221,7 +221,8 @@ bool Mario::gotHit() const
     char currentChar = _pMap->getCharCurrentMap(_position); // gets currentMap char at Mario's position
     char nextChar = _pMap->getCharCurrentMap(_newPosition); // gets currentMap char at Mario's new position
     if (currentChar == (char)GameConfig::utilKeys::EXPLOSION || currentChar == (char)GameConfig::utilKeys::BARREL || currentChar == (char)GameConfig::utilKeys::GHOST ||
-        nextChar == (char)GameConfig::utilKeys::EXPLOSION || nextChar == (char)GameConfig::utilKeys::BARREL || nextChar == (char)GameConfig::utilKeys::GHOST) // if Mario's current or next position is barrel or explosion
+        nextChar == (char)GameConfig::utilKeys::EXPLOSION || nextChar == (char)GameConfig::utilKeys::BARREL || nextChar == (char)GameConfig::utilKeys::GHOST ||
+		nextChar == (char)GameConfig::utilKeys::SMART_GHOST || currentChar == (char)GameConfig::utilKeys::SMART_GHOST) // if Mario's current or next position is barrel or explosion
     {
         return true;
     }

@@ -19,6 +19,7 @@ class Map
 {
 private:
     bool _useColors = false; // Indicates if colors are enabled (default: false)
+    bool _isSilent = false;
     char _originalMap[GameConfig::GAME_HEIGHT + 1][GameConfig::GAME_WIDTH + 1]; // Original map state (+1 for null terminator)
 
     char _currentMap[GameConfig::GAME_HEIGHT + 1][GameConfig::GAME_WIDTH + 1]; // Current map state (+1 for null terminator)
@@ -32,7 +33,7 @@ private:
     vector<Point> _smartGhostPositions; // Position of Smart Ghosts
 
 public:
-    Map() : _lifePosition({ -1, -1 }), _dkongPosition({ -1, -1 }), _paulinePosition({ -1, -1 }), _marioPosition({ -1, -1 }), _useColors(false) {} // Constructor initializes positions to invalid!!! state
+    Map() : _lifePosition({ -1, -1 }), _dkongPosition({ -1, -1 }), _paulinePosition({ -1, -1 }), _marioPosition({ -1, -1 }), _isSilent(false), _useColors(false) {} // Constructor initializes positions to invalid!!! state
     Map(const Map&) = delete; // Delete copy constructor to prevent copying
     Map& operator=(const Map&) = delete; // Delete copy assignment operator to prevent assignment
 
@@ -67,5 +68,7 @@ public:
     Point getMarioPosition() const { return _marioPosition; } // Get Mario position
     Point getHammerPosition() const { return _hammerPosition; } // Get hammer position
     vector<Point> getGhostPositions() const { return _ghostPositions; } // Get ghost positions
-    vector<Point> getSmartGhostPositions() const { return _smartGhostPositions; } // Get ghost positions
+    vector<Point> getSmartGhostPositions() const { return _smartGhostPositions; } // Get smart ghost positions
+
+    void setIsSilent(bool isSilentMode) {_isSilent = isSilentMode;}
 };
