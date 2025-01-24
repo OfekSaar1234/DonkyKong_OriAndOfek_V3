@@ -8,7 +8,6 @@
 
 int main(int argc, char** argv)
 {
-    vector<string> args(argv, argv + argc);
 	Game* game = nullptr;
 
     bool isLoad = argc > 1 && std::string(argv[1]) == "-load";
@@ -36,6 +35,7 @@ _________________________
 // we need to save seed of ghost
 // 2 more classes - one is steps and second is results
 // while in isSilent do we need to print the map only if(!isSilent)
+// delete to all 
 // 
 */
 
