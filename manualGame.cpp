@@ -65,12 +65,13 @@ void ManualGame::run()
 		clrscr(); // Clear screen for the new stage
 		Map map; // Create a new map object
 		
-		long random_seed;
+		long random_seed = 0;
 
 		Steps steps;
 		Results results;
 
 		size_t iteration = 0; // we need iteration to be outside the loop
+		size_t score = 0;
 
 		string filename_prefix = _fileNames[stage].substr(0, _fileNames[stage].find_last_of('.')); // dKong_01 for example
 		string stepsFilename = filename_prefix + ".steps";  // dKong_01.steps
@@ -80,12 +81,12 @@ void ManualGame::run()
 		{
 			map.reset();   // Reset map to initial state
 			map.enableColors(useColors); // Enable or disable colors based on user input
-			map.print();   // Print the map
+			map.print(/*_isSilent*/);   // Print the map
 
 			random_seed = static_cast<long>(chrono::system_clock::now().time_since_epoch().count());
 
-			if(_isSave)
-				steps.setRandomSeed(random_seed);
+			steps.setColorMode(useColors);
+			steps.setRandomSeed(random_seed);
 
 			srand(random_seed);
 
@@ -139,9 +140,6 @@ void ManualGame::run()
 			// Game loop runs while Mario has life and hasn't rescued Pauline
 			while (mario.getLife() > 0 && !mario.rescuedPauline())
 			{
-
-				++iteration;
-
 				if (_kbhit()) // Check if a key is pressed
 				{
 					char keyPressed = _getch(); // Get pressed key
@@ -190,7 +188,17 @@ void ManualGame::run()
 					if (!isPaused && keyPressed != (char)GameConfig::utilKeys::ESC) // If the game is running
 					{
 						mario.keyPressed(keyPressed); // Handle Mario's key press
-						steps.addStep(iteration, keyPressed);
+
+						if(_isSave && validKey(keyPressed))
+						{
+							if(tolower(keyPressed) == (char)GameConfig::utilKeys::HAMMER)
+							{
+								if(mario.getHammerStatus())
+									steps.addStep(iteration, keyPressed);
+							}
+							else
+								steps.addStep(iteration, keyPressed);
+						}
 					}
 				}
 
@@ -237,6 +245,7 @@ void ManualGame::run()
 								enemy->setStatus(true);
 							}
 
+							score += 1;
 							_score += 1;// Increase score
 							_scoreChange = true; // Mark score for redrawing
 							++i; // Continue to the next enemy
@@ -279,7 +288,11 @@ void ManualGame::run()
 
 					if (mario.getLifeStatus()) // If Mario died
 					{
-						results.addResult(iteration, Results::gotHit);
+						if (_isSave)
+						{
+							results.addResult(iteration, Results::gotHit);
+						}
+
 						resetStage(enemies, &mario, &map, &hammer); // Reset stage
 					}
 
@@ -306,18 +319,24 @@ void ManualGame::run()
 				{
 					Sleep(GameConfig::MOVE_DELAY); // Delay during pause
 				}
+				++iteration;
 			}
 
 			// Game over condition
 			if (mario.getLife() == 0)
 			{
-				results.addResult(iteration, Results::gameOver);
+				if (_isSave)
+					results.addResult(iteration, Results::gameOver);
+
 				stage = _fileNames.size(); // End the loop if Mario loses all lives
 				gameOverScreen(); // Show game over screen
 			}
 			else if (mario.rescuedPauline()) // Mario wins
 			{
-				results.addResult(iteration, Results::rescudedPauline);
+				if (_isSave)
+					results.addResult(iteration, Results::rescudedPauline);
+
+				score += 5;
 				_score += 5; // Bonus score for rescuing Pauline
 				if (stage == _fileNames.size() - 1) // We in the last stage/screen
 				{
@@ -329,23 +348,328 @@ void ManualGame::run()
 				}
 			}
 
+			results.addScore(score);
+
 			// delete all objects from container 
 			for (const auto& enemy : enemies)
 			{
 				delete enemy;
 			}
-
-			steps.saveSteps(stepsFilename); // create the new steps file
-			results.saveResults(resultsFilename); // create the new results file
+			if (_isSave)
+			{
+				steps.saveSteps(stepsFilename); // create the new steps file
+				results.saveResults(resultsFilename); // create the new results file
+			}
 		}
 		else // If the map fails to load
 		{
 			gameErrorScreen(); // Show error screen
 		}
-		iteration = 0;
 	}
 
 	// Reset game settings for new game
 	_levelNum = 0;
 	_score = 0;
+}
+
+
+void ManualGame::levelsScreen()
+{
+	clrscr(); // Clear the screen to show the level selection screen
+
+	cout << "\n === Available Levels ===\n\n";
+	int counter = 1; // Initialize a counter for the levels (1-based index)
+
+	// Loop through the file names representing levels
+	for (const auto& fileName : _fileNames)
+	{
+		cout << counter << ". " << fileName << endl; // Display the level number and its name
+		++counter; // Increment the counter for the next level
+	}
+
+	cout << "\n\nEnter the level number to select: ";
+
+	// Wait for user input to select a level
+	size_t level;
+	cin >> level; // Read the selected level number
+
+	level -= 1;  // Convert the input to 0-based index (since user sees 1-based numbering)
+
+	// Check if the level number is valid
+	if (0 <= level && level < _fileNames.size() && _fileNames.size() >= 1)
+	{
+		_levelNum = level; // Set the selected level number
+	}
+}
+
+
+
+void ManualGame::gameOverScreen()
+{
+	clrscr(); // Clear the screen when resuming
+	// Game Over screen layout
+	const char* gameOverMap[GameConfig::GAME_HEIGHT] = {
+		"QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ", // 0
+		"Q                                                                              Q", // 1
+		"Q                                                                              Q", // 2
+		"Q                                                                              Q", // 3
+		"Q                              G A M E   O V E R                               Q", // 4
+		"Q                                                                              Q", // 5
+		"Q                                                                              Q", // 6
+		"Q                           Better luck next time!                             Q", // 7
+		"Q                                                                              Q", // 8
+		"Q                                                                              Q", // 9
+		"Q                     Press any key to return to the menu...                   Q", // 10
+		"Q                                                                              Q", // 11
+		"Q                                                                              Q", // 12
+		"Q                                                                              Q", // 13
+		"Q                                                                              Q", // 14
+		"Q                                                                              Q", // 15
+		"Q                                                                              Q", // 16
+		"Q                                                                              Q", // 17
+		"Q                                                                              Q", // 18
+		"Q                                                                              Q", // 19
+		"Q                                                                              Q", // 20
+		"Q                                                                              Q", // 21
+		"Q                                                                              Q", // 22
+		"Q                                                                              Q", // 23
+		"QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ"  // 24
+	};
+
+	// Print the Game Over screen
+	for (int i = 0; i < GameConfig::GAME_HEIGHT - 1; ++i)
+	{
+		cout << gameOverMap[i] << endl;
+	}
+	cout << gameOverMap[GameConfig::GAME_HEIGHT - 1];
+	// Wait for user input to return to the menu
+	_ch = _getch();
+
+	//check mario life restore ////////////////////
+}
+
+void ManualGame::gameWinningScreen()
+{
+	clrscr(); // Clear the screen when resuming
+	// Game Winning screen layout
+	const char* winningScreenMap[GameConfig::GAME_HEIGHT] = {
+		"QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ", // 0
+		"Q                                                                              Q", // 1
+		"Q                                                                              Q", // 2
+		"Q                         W   W   III   N   N   !!!                            Q", // 3
+		"Q                         W   W    I    NN  N   !!!                            Q", // 4
+		"Q                         W W W    I    N N N   !!!                            Q", // 5
+		"Q                          W W    III   N  NN   !!!                            Q", // 6
+		"Q                                                                              Q", // 7
+		"Q                                                                              Q", // 8
+		"Q                                                                              Q", // 9
+		"Q                      C O N G R A T U L A T I O N S !                         Q", // 10
+		"Q                                                                              Q", // 11
+		"Q                  The princess was rescued by the brave Mario                 Q", // 12
+		"Q                                                                              Q", // 13
+		"Q                    Press any key to return to the menu...                    Q", // 14
+		"Q                                                                              Q", // 15
+		"Q                                                                              Q", // 16
+		"Q                           *   *   *   *   *   *                              Q", // 17
+		"Q                            * * * * * * * * * *                               Q", // 18
+		"Q                             *   *   *   *   *                                Q", // 19
+		"Q                                                                              Q", // 20
+		"Q                                                                              Q", // 21
+		"Q                                                                              Q", // 22
+		"Q                                                                              Q", // 23
+		"QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ"  // 24
+	};
+
+	// Print the Winning Screen
+	for (int i = 0; i < GameConfig::GAME_HEIGHT - 1; ++i)
+	{
+		cout << winningScreenMap[i] << endl;
+	}
+	cout << winningScreenMap[GameConfig::GAME_HEIGHT - 1];
+
+	// Wait for user input to return to the menu
+	_ch = _getch();
+}
+
+void ManualGame::nextLevelScreen()
+{
+	clrscr(); // Clear the screen when resuming
+	// Game Winning screen layout
+	const char* winningScreenMap[GameConfig::GAME_HEIGHT] = {
+		"QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ", // 0
+		"Q                                                                              Q", // 1
+		"Q                                                                              Q", // 2
+		"Q                                                                              Q", // 3
+		"Q                   OH NO! DONKEY KONG KIDNAPPED THE PRINCESS!                 Q", // 4
+		"Q                                                                              Q", // 5
+		"Q                    Mario was too slow to reach her in time...                Q", // 6
+		"Q                    Donkey Kong took her to the next stage!                   Q", // 7
+		"Q                                                                              Q", // 8
+		"Q                                                                              Q", // 9
+		"Q            Mario, you must hurry! Go to the next stage and rescue her!       Q", // 10
+		"Q                                                                              Q", // 11
+		"Q                             *   *   *   *   *   *                            Q", // 12
+		"Q                              * * * * * * * * * *                             Q", // 13
+		"Q                               *   *   *   *   *                              Q", // 14
+		"Q                                                                              Q", // 15
+		"Q                                                                              Q", // 16
+		"Q                     Press any key to move to the next level!!                Q", // 17
+		"Q                                                                              Q", // 18
+		"Q                                                                              Q", // 19
+		"Q                                                                              Q", // 20
+		"Q                                                                              Q", // 21
+		"Q                                                                              Q", // 22
+		"Q                                                                              Q", // 23
+		"QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ"  // 24
+	};
+
+	// Print the Winning Screen
+	for (int i = 0; i < GameConfig::GAME_HEIGHT - 1; ++i)
+	{
+		cout << winningScreenMap[i] << endl;
+	}
+	cout << winningScreenMap[GameConfig::GAME_HEIGHT - 1];
+
+	// Wait for user input to return to the menu
+	_ch = _getch();
+}
+
+
+void ManualGame::gameErrorScreen()
+{
+	clrscr(); // Clear the screen when resuming
+	// Game Winning screen layout
+	const char* errorScreenMap[GameConfig::GAME_HEIGHT] = {
+		"EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE", // 0
+		"E                                                                              E", // 1
+		"E                                                                              E", // 2
+		"E                         OOO   OOO   PPPP   SSSS   !!!                        E", // 3
+		"E                        O   O O   O  P   P S       !!!                        E", // 4
+		"E                        O   O O   O  PPPP   SSSS   !!!                        E", // 5
+		"E                        O   O O   O  P         S   !!!                        E", // 6
+		"E                         OOO   OOO   P     SSSS    !!!                        E", // 7
+		"E                                                                              E", // 8
+		"E                     Something went terribly wrong!                           E", // 9
+		"E                                                                              E", // 10
+		"E               It seems the princess is in another castle...                  E", // 11
+		"E                     Or maybe Bowser ate your map !                           E", // 12
+		"E                                                                              E", // 13
+		"E                     Error Code: MAMA-MTA-404                                 E", // 14
+		"E                                                                              E", // 15
+		"E                Press any key to return and debug this mess...                E", // 16
+		"E                                                                              E", // 17
+		"E                                                                              E", // 18
+		"E                                                                              E", // 19
+		"E                                                                              E", // 20
+		"E                                                                              E", // 21
+		"E                                                                              E", // 22
+		"E                                                                              E", // 23
+		"EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE"  // 24
+	};
+
+	// Print the error Screen
+	for (int i = 0; i < GameConfig::GAME_HEIGHT - 1; ++i)
+	{
+		cout << errorScreenMap[i] << endl;
+	}
+	cout << errorScreenMap[GameConfig::GAME_HEIGHT - 1];
+
+	// Wait for user input to return to the menu
+	_ch = _getch();
+}
+
+
+
+
+void ManualGame::MenuScreen()
+{
+	clrscr(); // Clear the screen when resuming
+	// Menu layout screen
+	const char* menuMap[GameConfig::GAME_HEIGHT] = {
+		"QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ", // 0
+		"Q                                                                              Q", // 1
+		"Q                                                                              Q", // 2
+		"Q                      WELCOME TO DONKEY KONG CLASSIC                          Q", // 3
+		"Q                                                                              Q", // 4
+		"Q                      Developed by: Ofek Saar & Ori Ratzabi                   Q", // 5
+		"Q                                                                              Q", // 6
+		"Q                       1. Start a New Game                                    Q", // 7
+		"Q                       2. levels Screens                                      Q", // 8
+		"Q                       8. Instructions                                        Q", // 9
+		"Q                       9. Exit                                                Q", // 10
+		"Q                                                                              Q", // 11
+		"Q                       Enter Your Choice:                                     Q", // 12
+		"Q                                                                              Q", // 13
+		"Q                       Prepare to Climb, Jump, and be amazed!                 Q", // 14
+		"Q                                                                              Q", // 15
+		"Q                                                                              Q", // 16
+		"Q           Note: You can choose specific level option 2 (level screen)        Q", // 17
+		"Q                 and start playing at the level you chose                     Q", // 18
+		"Q                                                                              Q", // 19
+		"Q               If no level has been picked (or no existing level),            Q", // 20
+		"Q                        the game will start at level 1                        Q", // 21
+		"Q                                                                              Q", // 22
+		"Q                                                                              Q", // 23
+		"QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ"  // 24
+	};
+
+	// Print the menu  to the console
+	for (int i = 0; i < GameConfig::GAME_HEIGHT - 1; ++i)
+	{
+		cout << menuMap[i] << endl;
+	}
+	cout << menuMap[GameConfig::GAME_HEIGHT - 1];
+
+}
+
+void ManualGame::InstructionsScreen()
+{
+	clrscr(); // Clear the screen when resuming
+
+	// instructions layout screen
+	const char* instructionScreen[GameConfig::GAME_HEIGHT] = {
+		"QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ", // 0
+		"Q                                                                              Q", // 1
+		"Q                                                                              Q", // 2
+		"Q                               Instructions:                                  Q", // 3
+		"Q                                                                              Q", // 4
+		"Q                               a/A - Move Left                                Q", // 5
+		"Q                               d/D - Move Right                               Q", // 6
+		"Q                               w/W - Jump/Climb Up                            Q", // 7
+		"Q                               x/X - Climb Down                               Q", // 8
+		"Q                               s/S - Stay                                     Q", // 9
+		"Q                               ESC - Pause Game                               Q", // 10
+		"Q                                                                              Q", // 11
+		"Q  !!!Be aware of barrels and their explosion you will die if you get close!!! Q", // 12
+		"Q        !!!Be aware of ghosts, once you touch a ghost you will die as well    Q", // 13
+		"Q                                                                              Q", // 14
+		"Q     If you kill a ghost or smash the barrel you will get an extra point!!!   Q", // 15
+		"Q     If you save the princes in each level you get an extra 5 point!          Q", // 16
+		"Q                                                                              Q", // 17
+		"Q                                                                              Q", // 18
+		"Q                                                                              Q", // 19
+		"Q                      Press any key to return to menu...                      Q", // 20
+		"Q                                                                              Q", // 21
+		"Q                                                                              Q", // 22
+		"Q                                                                              Q", // 23
+		"QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ"  // 24
+	};
+
+	// Print the instruction layout to the console
+	for (int i = 0; i < GameConfig::GAME_HEIGHT - 1; ++i)
+	{
+		cout << instructionScreen[i] << endl;
+	}
+	cout << instructionScreen[GameConfig::GAME_HEIGHT - 1];
+	// Wait for user input to return to the menu
+	_ch = _getch();
+
+	//return cursur to start 
+}
+
+
+bool ManualGame::validKey(const char keyPressed) const
+{
+	string validKeys = "wsdaxpn"; // List of valid keys
+	return validKeys.find(tolower(keyPressed)) != string::npos; // .find function return "string::npos" if the key isn't in the string validKeys
 }

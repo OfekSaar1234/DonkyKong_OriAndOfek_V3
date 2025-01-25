@@ -11,7 +11,10 @@ public:
 
     // Movement delay
     static constexpr int MOVE_DELAY = 78;
+    static constexpr int MOVE_DELAY_LOAD = 20;
 
+
+    
     // Utility keys enum
     enum class utilKeys { SPACE = ' ', LADDER = 'H', FLOOR = '=', LFLOOR = '<', RFLOOR = '>', MARIO = '@', BARREL = 'O', GHOST = 'x', SMART_GHOST = 'X', EDGE = 'Q', EXPLOSION = '*', PAULINE = '$', HAMMER = 'p', DKONG = '&', LIFE = 'L', SMASH = '~', ESC = 27};
 

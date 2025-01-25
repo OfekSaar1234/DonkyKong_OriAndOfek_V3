@@ -1,6 +1,7 @@
 #pragma once
 #include "game.h"
-
+#include "steps.h"
+#include "results.h"
 
 
 
@@ -10,13 +11,14 @@ private:
 
 	bool _isSilent = false;
 
-
-
+	void run() override;
+	void reportResultError(const std::string& message, const std::string& filename, size_t iteration);
+	void loadValidScreen();
 
 public:
 	AutomaticGame(bool isSilent) : _isSilent(isSilent) {}
+	virtual ~AutomaticGame() = default;
 
-	void run() override {};
-	void menu() override {};
+	void menu() override;
 };
 

@@ -26,31 +26,24 @@ protected:
     size_t _levelNum = 0; // Current level number
     int _gameLoop = 0; // Counter for game loops
     vector<string> _fileNames; // Stores all map file names
-    bool isLoad = false;
-    bool isSilent = false;
-    bool isSave = false;
+    bool _isLoad = false;
+    bool _isSilent = false;
+    bool _isSave = false;
     int _score = 0; // Current score
     bool _scoreChange = false; // Tracks if the score has changed
     
     // shared methods for all game modes
     void getAllMapsFileNames(); // Retrieves all map file names from the folder
     void resetStage(vector<Enemy*>& enemies, Mario* pMario, Map* pMap, Hammer* pHammer); // Resets the stage (resets Mario, enemies, map, and hammer)
-    void levelsScreen(); // Displays levels for the user to choose
-    void gameOverScreen(); // Displays the game over screen
-    void gameWinningScreen(); // Displays the game-winning screen
-    void nextLevelScreen(); // Displays the next level screen
-    void gameErrorScreen(); // Displays the error screen
     void noMapsErrorScreen(); // Displays an error screen when no maps are found
-    void InstructionsScreen(); // Displays the instructions screen
-    void MenuScreen(); // Displays the main menu
+   
 
 
 public:
-    Game() : isLoad(false), isSilent(false),isSave(false), _ch('\0'), _gameLoop(0), _score(0), _scoreChange(false) {} // Default constructor
+    Game() : _isLoad(false), _isSilent(false),_isSave(false), _ch('\0'), _gameLoop(0), _score(0), _scoreChange(false) {} // Default constructor
 	Game(const Game&) = delete; // Deletes the copy constructor
 	Game& operator=(const Game&) = delete; // Deletes the copy assignment operator
 	virtual ~Game() = default;
-
 
 	// Virtual Functions
 	virtual void run() = 0; // Runs the game
