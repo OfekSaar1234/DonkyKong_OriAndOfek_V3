@@ -3,8 +3,11 @@
 
 void Mario::draw(char ch) const // Draw character at Mario's position
 {
-    gotoxy(_position.getX(), _position.getY());
-    cout << ch;
+    if(!_pMap->getIsSilent())
+    {
+        gotoxy(_position.getX(), _position.getY());
+        cout << ch;
+    }
 }
 
 void Mario::erase() // erases Mario
@@ -17,8 +20,11 @@ void Mario::erase() // erases Mario
         _pHammer->lift();
     }
 
-    gotoxy(_position.getX(), _position.getY());
-    cout << originalChar; // Restore original character instead of erasing it with space.
+    if(!_pMap->getIsSilent())
+    {
+        gotoxy(_position.getX(), _position.getY());
+        cout << originalChar; // Restore original character instead of erasing it with space.
+    }
 }
 
 // Handles key presses to control Mario's actions
@@ -208,8 +214,12 @@ void Mario::move()
             _pHammer->setUses(GameConfig::NUM_OF_P_USES); // set the uses 
             _pMap->updateOriginMap(_newPosition, ' '); // update space to original map
             _pMap->updateCurrMap(_newPosition, ' '); // update space to current map
-            gotoxy(_newPosition.getX(), _newPosition.getY());
-            cout << ' ';
+
+            if(!_pMap->getIsSilent())
+            {
+                gotoxy(_newPosition.getX(), _newPosition.getY());
+                cout << ' ';
+            }
         }
         _position = _newPosition;  // Update position if no collision occurs (common case) 
     }

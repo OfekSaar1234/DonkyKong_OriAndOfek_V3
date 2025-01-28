@@ -3,7 +3,6 @@
 
 using namespace std;
 
-// Displays the main menu and handles user input for menu options.
 void Game::menu()
 {
     ShowConsoleCursor(false); // Hide the console cursor

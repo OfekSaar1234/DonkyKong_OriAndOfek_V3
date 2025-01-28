@@ -24,16 +24,11 @@ int main(int argc, char** argv)
 	   game = new ManualGame(isSave);
 	   game->menu(); // Start the game
    } 
-
    delete game;
 }
 
 
 /*  TO DO LIST
 _________________________
-// while in isSilent do we need to print the map only if(!isSilent)
-// delete to all 
-// change map/screen functions and add the ones for Automatic game for errors in load
-// readme file that contains format for steps and result files
 */
 

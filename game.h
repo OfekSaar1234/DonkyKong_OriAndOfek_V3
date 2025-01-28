@@ -26,9 +26,6 @@ protected:
     size_t _levelNum = 0; // Current level number
     int _gameLoop = 0; // Counter for game loops
     vector<string> _fileNames; // Stores all map file names
-    bool _isLoad = false;
-    bool _isSilent = false;
-    bool _isSave = false;
     int _score = 0; // Current score
     bool _scoreChange = false; // Tracks if the score has changed
     
@@ -36,11 +33,9 @@ protected:
     void getAllMapsFileNames(); // Retrieves all map file names from the folder
     void resetStage(vector<Enemy*>& enemies, Mario* pMario, Map* pMap, Hammer* pHammer); // Resets the stage (resets Mario, enemies, map, and hammer)
     void noMapsErrorScreen(); // Displays an error screen when no maps are found
-   
-
 
 public:
-    Game() : _isLoad(false), _isSilent(false),_isSave(false), _ch('\0'), _gameLoop(0), _score(0), _scoreChange(false) {} // Default constructor
+    Game() :  _ch('\0'), _gameLoop(0), _score(0), _scoreChange(false) {} // Default constructor
 	Game(const Game&) = delete; // Deletes the copy constructor
 	Game& operator=(const Game&) = delete; // Deletes the copy assignment operator
 	virtual ~Game() = default;

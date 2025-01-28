@@ -64,8 +64,12 @@ void Barrel::explosion()
             newPosition = { newX, newY }; // Set new position
 
             _pMap->updateCurrMap(newPosition, (char)GameConfig::utilKeys::EXPLOSION); // Update map with explosion
-            gotoxy(newX, newY); // Move cursor to new position
-            cout << (char)GameConfig::utilKeys::EXPLOSION; // Display explosion on screen
+            if (!_pMap->getIsSilent())
+            {
+                gotoxy(newX, newY); // Move cursor to new position
+                cout << (char)GameConfig::utilKeys::EXPLOSION; // Display explosion on screen
+            }
+            
         }
     }
 }
@@ -93,8 +97,11 @@ void Barrel::clearExplosion()
             originalChar = _pMap->getCharOriginalMap(newPosition); // Get original character at position
 
             _pMap->updateCurrMap(newPosition, originalChar); // Restore original character in map
-            gotoxy(newX, newY); // Move cursor to new position
-            cout << originalChar; // Display original character on screen
+            if (!_pMap->getIsSilent())
+            {
+                gotoxy(newX, newY); // Move cursor to new position
+                cout << originalChar; // Display original character on screen
+            }
         }
     }
 

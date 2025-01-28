@@ -28,8 +28,11 @@ void Hammer::hit(const Point& firstHit, const Point& secondHit)
 	// Visual feedback on the console to show the hit (using '~' symbol)
 	if (_pMap->getCharOriginalMap(_firstHitPos) != (char)GameConfig::utilKeys::EDGE) // do not draw ~ when near EDGE
 	{
-		gotoxy(firstHit.getX(), firstHit.getY()); // Move cursor to first hit position
-		cout << '~'; // Display the '~' symbol at the first hit position
+		if (!_pMap->getIsSilent())
+		{
+			gotoxy(firstHit.getX(), firstHit.getY()); // Move cursor to first hit position
+			cout << '~'; // Display the '~' symbol at the first hit position
+		}
 		if (_pMap->getCharOriginalMap(_secondHitPos) != (char)GameConfig::utilKeys::EDGE) // do not draw ~ when near EDGE
 		{
 			gotoxy(secondHit.getX(), secondHit.getY()); // Move cursor to second hit position
@@ -47,12 +50,15 @@ void Hammer::lift()
 	// Check if the original character at the first hit position is not EDGE and restore it
 	if (_pMap->getCharOriginalMap(_firstHitPos) != (char)GameConfig::utilKeys::EDGE)
 	{
-		gotoxy(_firstHitPos.getX(), _firstHitPos.getY()); // Move cursor to the first hit position
-		cout << originalFirstHit; // Restore the original character at the first hit position
-		if (_pMap->getCharOriginalMap(_secondHitPos) != (char)GameConfig::utilKeys::EDGE)
+		if (!_pMap->getIsSilent())
 		{
-			gotoxy(_secondHitPos.getX(), _secondHitPos.getY()); // Move cursor to the second hit position
-			cout << originalSecondHit; // Restore the original character at the second hit position
+			gotoxy(_firstHitPos.getX(), _firstHitPos.getY()); // Move cursor to the first hit position
+			cout << originalFirstHit; // Restore the original character at the first hit position
+			if (_pMap->getCharOriginalMap(_secondHitPos) != (char)GameConfig::utilKeys::EDGE)
+			{
+				gotoxy(_secondHitPos.getX(), _secondHitPos.getY()); // Move cursor to the second hit position
+				cout << originalSecondHit; // Restore the original character at the second hit position
+			}
 		}
 	}
 
@@ -72,6 +78,9 @@ void Hammer::reset()
 {
 	_uses = GameConfig::NUM_OF_P_USES; // Reset hammer uses 
 	_pMap->updateOriginMap(_pMap->getHammerPosition(), (char)GameConfig::utilKeys::HAMMER); // Place the hammer back in its original position
-	gotoxy(_pMap->getHammerPosition().getX(), _pMap->getHammerPosition().getY()); // Move cursor to hammer's position
-	cout << (char)GameConfig::utilKeys::HAMMER; // Print the hammer at the original position
+	if (!_pMap->getIsSilent())
+	{
+		gotoxy(_pMap->getHammerPosition().getX(), _pMap->getHammerPosition().getY()); // Move cursor to hammer's position
+		cout << (char)GameConfig::utilKeys::HAMMER; // Print the hammer at the original position
+	}
 }

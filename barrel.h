@@ -16,12 +16,12 @@ public:
 
     Barrel(const Point& startPos) : Enemy(startPos, { 0, 1 }) {}
 
-    // Override virtual functions from Enemy class !
+    // Override virtual functions from Enemy class
     virtual void draw() const override { Enemy::draw((char)GameConfig::utilKeys::BARREL); }
     virtual void move() override; // Implement barrel movement logic
     virtual void reset() override; // Reset barrel to initial state
 
-    // Additional methods specific to Barrel ! 
+    // Additional methods specific to Barrel 
     void explosion(); // Trigger barrel explosion
     void clearExplosion(); // Clear explosion effects
 };

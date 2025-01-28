@@ -5,15 +5,20 @@
 Steps Steps::loadSteps(const std::string& filename) {
 	Steps steps;
 	ifstream steps_file(filename);
-	steps_file >> steps._colorMode;
-	steps_file >> steps._randomSeed;
-	size_t size;
-	steps_file >> size;
-	while (!steps_file.eof() && size-- != 0) {
-		size_t iteration;
-		char step;
-		steps_file >> iteration >> step;
-		steps.addStep(iteration, step);
+	if (!steps_file.is_open())
+		steps._doesExist = false;
+	else
+	{
+		steps_file >> steps._colorMode;
+		steps_file >> steps._randomSeed;
+		size_t size;
+		steps_file >> size;
+		while (!steps_file.eof() && size-- != 0) {
+			size_t iteration;
+			char step;
+			steps_file >> iteration >> step;
+			steps.addStep(iteration, step);
+		}
 	}
 	steps_file.close();
 	return steps;

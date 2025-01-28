@@ -9,7 +9,7 @@ private:
 
 	bool _isSave = false; 
 
-	void run() override;
+	virtual void run() override;
 	bool validKey(const char keyPressed)const;
 	void levelsScreen(); // Displays levels for the user to choose
 	void gameOverScreen(); // Displays the game over screen
@@ -23,6 +23,6 @@ public:
 	ManualGame(bool isSave) : _isSave(isSave) {}
 	virtual ~ManualGame() = default;
 
-	void menu() override; // Runs the Manual Game menu
+	virtual void menu() override; // Runs the Manual Game menu
 };
 

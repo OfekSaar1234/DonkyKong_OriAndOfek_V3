@@ -1,6 +1,5 @@
 #include "automaticGame.h"
 
-
 void AutomaticGame::menu() 
 {
 	ShowConsoleCursor(false); // Hide the console cursor
@@ -10,10 +9,8 @@ void AutomaticGame::menu()
 	run();
 }
 
-
 void AutomaticGame::run()
 {
-	
 	clrscr(); // Clear screen
 	Mario mario; // Create Mario character
 
@@ -28,7 +25,7 @@ void AutomaticGame::run()
 	for (size_t stage = _levelNum; stage < _fileNames.size(); stage++)
 	{
 		clrscr(); // Clear screen for the new stage
-		Map map; // Create a new map object
+		Map map(_isSilent); // Create a new map object
 
 		long random_seed = 0;
 		size_t iteration = 0;
@@ -37,23 +34,33 @@ void AutomaticGame::run()
 		Steps steps;
 		Results results;
 
-		string filename_prefix = _fileNames[stage].substr(0, _fileNames[stage].find_last_of('.'));
+		string filename_prefix = _fileNames[stage].substr(0, _fileNames[stage].find_last_of('.')); //dkong_01
 		string stepsFilename = filename_prefix + ".steps";
 		string resultsFilename = filename_prefix + ".result";
-
-
 
 		if (map.load(_fileNames[stage])) // If map successfully loads
 		{
 			steps = Steps::loadSteps(stepsFilename);
+			if(!steps.getDoesExist())
+			{
+				_isValid = false;
+				continue;
+			}
+
 			random_seed = steps.getRandomSeed();
+
 			results = Results::loadResults(resultsFilename);
+			if (!results.getDoesExist())
+			{
+				_isValid = false;
+				continue;
+			}
 
 			srand(random_seed);
 
 			map.reset();   // Reset map to initial state
 			map.enableColors(steps.getColorMode()); // Enable or disable colors based on user input
-			map.print(/*_isSilent*/);   // Print the map
+			map.print();   // Print the map
 
 			mario.resetToNextStage(map.getMarioPosition()); // Reset Mario's position for the new stage
 
@@ -106,6 +113,7 @@ void AutomaticGame::run()
 				size_t nextGotHitIteration = 0;
 
 				if (results.isFinishedBy(iteration)) {
+					_isValid = false;
 					reportResultError("Results file finished while game hadn't!", _fileNames[stage], iteration);
 					unmatching_result_found = true;
 					break;
@@ -209,6 +217,7 @@ void AutomaticGame::run()
 
 					if (results.popResult() != pair{ iteration, Results::gotHit }) 
 					{
+						_isValid = false;
 						reportResultError("Results file doesn't match mario got hit event!", _fileNames[stage], iteration);
 						unmatching_result_found = true;
 						break;
@@ -219,6 +228,7 @@ void AutomaticGame::run()
 				{
 					if (iteration == nextGotHitIteration && nextGotHitIteration != 0) 
 					{
+						_isValid = false;
 						reportResultError("Results file has a hit event that didn't happen in the game!", _fileNames[stage], iteration);
 						unmatching_result_found = true;
 						break;
@@ -255,6 +265,7 @@ void AutomaticGame::run()
 				{
 					if (results.popResult() != pair{ iteration, Results::gameOver })
 					{
+						_isValid = false;
 						reportResultError("Results file doesn't match Game Over event! terminating load", _fileNames[stage], iteration);
 						unmatching_result_found = true;
 					}
@@ -266,6 +277,7 @@ void AutomaticGame::run()
 
 					if (results.popResult() != pair{ iteration, Results::rescudedPauline })
 					{
+						_isValid = false;
 						reportResultError("Results file doesn't match rescuded Pauline event!", _fileNames[stage], iteration);
 						unmatching_result_found = true;
 					}
@@ -277,12 +289,14 @@ void AutomaticGame::run()
 				}
 				else if (results.popResult() == pair{ iteration, Results::noResult })
 				{
+					_isValid = false;
 					reportResultError("you must have been pressing N ha?\n YOU CHEATER!!!!!", _fileNames[stage], iteration);
 					unmatching_result_found = true;
 				}
 
 				if (score != results.getScore()) // checks if curr map score match load file score
 				{
+					_isValid = false;
 					reportResultError("Results file doesn't match score value of the game!", _fileNames[stage], iteration);
 					unmatching_result_found = true;
 				}
@@ -295,50 +309,148 @@ void AutomaticGame::run()
 			}
 		}
 	}
-	loadValidScreen();
+	if (_isValid)
+		loadValidGame();
+	else
+		loadInValidGame();
 }
-
-
 
 void AutomaticGame::reportResultError(const string& message, const string& filename, size_t iteration)
 {
-	system("cls");
-	cout << "Screen " << filename << " - " << message << '\n';
-	cout << "Iteration: " << iteration << '\n';
-	cout << "Press any key to continue to next screens (if any)" << endl;
-	_getch();
+	clrscr(); // Clear the screen for a fresh display
+
+	// Define the error screen layout
+	const char* errorScreen[GameConfig::GAME_HEIGHT] = {
+		"                                                                                ", // 0
+		"                                                                                ", // 1
+		"          ERROR DETECTED                                                        ", // 2
+		"                                                                                ", // 3
+		"                                                                                ", // 4
+		"                                                                                ", // 5
+		"                                                                                ", // 6
+		"          File:                                                                 ", // 7
+		"                                                                                ", // 8
+		"                                                                                ", // 9
+		"          Iteration:                                                            ", // 10
+		"                                                                                ", // 11
+		"          Press any key to continue to the next screen...                       ", // 12
+		"                                                                                ", // 13
+		"                                                                                ", // 14
+		"                                                                                ", // 15
+		"                                                                                ", // 16
+		"                                                                                ", // 17
+		"                                                                                ", // 18
+		"                                                                                ", // 19
+		"                                                                                ", // 20
+		"                                                                                ", // 21
+		"                                                                                ", // 22
+		"                                                                                ", // 23
+		"                                                                                "  // 24
+	};
+
+	// Customize the error screen with details
+	for (int i = 0; i < GameConfig::GAME_HEIGHT; ++i)
+	{
+		if (i == 4)
+		{
+			// Display the error message on line 4
+			cout << "          " << message << endl;
+		}
+		else if (i == 7)
+		{
+			// Display the file name on line 7
+			cout << "          File: " << filename << endl;
+		}
+		else if (i == 10)
+		{
+			// Display the iteration on line 10
+			cout << "          Iteration: " << iteration << endl;
+		}
+		else
+		{
+			// Display other lines from the template
+			cout << errorScreen[i] << endl;
+		}
+	}
+
+	// Wait for user input to proceed
+	_ch = _getch();
 }
 
-void AutomaticGame::loadValidScreen()
+void AutomaticGame::loadValidGame()
 {
 	clrscr(); // Clear the screen for a fresh start
 	// Load Valid Screen layout
 	const char* validScreenMap[GameConfig::GAME_HEIGHT] = {
-		"LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL", // 0
-		"L                                                                              L", // 1
-		"L                                                                              L", // 2
-		"L                         GGG   GGG    !!!  GGG    GGG                        L", // 3
-		"L                        G      G      !!!  G      G                           L", // 4
-		"L                        G   Gh G  GG  !!!  G  GG  G  GG                       L", // 5
-		"L                        G   G  G   G  !!!  G   G  G   G                       L", // 6
-		"L                         GGG    GGG   !!!   GGG    GGG                        L", // 7
-		"L                                                                              L", // 8
-		"L                   Your save file is safe and sound!                          L", // 9
-		"L                                                                              L", // 10
-		"L            The princess is waiting for you in this castle!                   L", // 11
-		"L                                                                              L", // 12
-		"L                Bowser is sharpening his shell hurry up!                      L", // 13
-		"L                                                                              L", // 14
-		"L                     Save Code: MARIO-GG-GOOD-200                             L", // 15
-		"L                                                                              L", // 16
-		"L            Press any key to start your epic Mario adventure!                 L", // 17
-		"L                                                                              L", // 18
-		"L                                                                              L", // 19
-		"L                                                                              L", // 20
-		"L                                                                              L", // 21
-		"L                                                                              L", // 22
-		"L                                                                              L", // 23
-		"LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL"  // 24
+	"                                                                                ", // 0
+	"                                                                                ", // 1
+	"           VALID SAVE FILE LOADED                                               ", // 2
+	"                                                                                ", // 3
+	"           Your save file is safe and sound!                                    ", // 4
+	"                                                                                ", // 5
+	"           The princess is waiting for you in this castle!                      ", // 6
+	"                                                                                ", // 7
+	"           Bowser is sharpening his shell, hurry up!                            ", // 8
+	"                                                                                ", // 9
+	"           Save Code: MARIO-GG-GOOD-200                                         ", // 10
+	"                                                                                ", // 11
+	"           Press any key to end the program                                     ", // 12
+	"                                                                                ", // 13
+	"                                                                                ", // 14
+	"                                                                                ", // 15
+	"                                                                                ", // 16
+	"                                                                                ", // 17
+	"                                                                                ", // 18
+	"                                                                                ", // 19
+	"                                                                                ", // 20
+	"                                                                                ", // 21
+	"                                                                                ", // 22
+	"                                                                                ", // 23
+	"                                                                                "  // 24
+	};
+
+	// Print the valid screen
+	for (int i = 0; i < GameConfig::GAME_HEIGHT - 1; ++i)
+	{
+		cout << validScreenMap[i] << endl;
+	}
+	cout << validScreenMap[GameConfig::GAME_HEIGHT - 1];
+
+	// Wait for user input to proceed
+	_ch = _getch();
+
+}
+
+void AutomaticGame::loadInValidGame()
+{
+	clrscr(); // Clear the screen for a fresh start
+	// Load InValid Screen layout
+	const char* validScreenMap[GameConfig::GAME_HEIGHT] = {
+	"                                                                                ", // 0
+	"                                                                                ", // 1
+	"           Mamma mia! One or more of your save files are corrupted!             ", // 2
+	"                                                                                ", // 3
+	"           It's-a me, Mario! We can't continue like this!                       ", // 4
+	"                                                                                ", // 5
+	"           Better-a fix it and try again!                                       ", // 6
+	"                                                                                ", // 7
+	"           Wahoo!                                                               ", // 8
+	"                                                                                ", // 9
+	"                                                                                ", // 10
+	"                                                                                ", // 11
+	"           Press any key to end the program                                     ", // 12
+	"                                                                                ", // 13
+	"                                                                                ", // 14
+	"                                                                                ", // 15
+	"                                                                                ", // 16
+	"                                                                                ", // 17
+	"                                                                                ", // 18
+	"                                                                                ", // 19
+	"                                                                                ", // 20
+	"                                                                                ", // 21
+	"                                                                                ", // 22
+	"                                                                                ", // 23
+	"                                                                                "  // 24
 	};
 
 	// Print the valid screen

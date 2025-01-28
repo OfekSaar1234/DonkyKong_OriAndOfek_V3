@@ -155,50 +155,53 @@ void Map::reset()
 
 void Map::print() const
 {
-	for (int i = 0; i < GameConfig::GAME_HEIGHT - 1; i++)
+	if (!_isSilent)
 	{
-		for (int j = 0; j < GameConfig::GAME_WIDTH; j++)
+		for (int i = 0; i < GameConfig::GAME_HEIGHT - 1; i++)
 		{
-			char element = _currentMap[i][j];
-
-			if (_useColors)
+			for (int j = 0; j < GameConfig::GAME_WIDTH; j++)
 			{
-				// Set colors based on element type
-				switch (element)
+				char element = _currentMap[i][j];
+
+				if (_useColors)
 				{
-				case (char)GameConfig::utilKeys::FLOOR:
-					setConsoleColor((char)GameConfig::colors::RED); // Red
-					break;
+					// Set colors based on element type
+					switch (element)
+					{
+					case (char)GameConfig::utilKeys::FLOOR:
+						setConsoleColor((char)GameConfig::colors::RED); // Red
+						break;
 
-				case (char)GameConfig::utilKeys::LFLOOR:
-				case (char)GameConfig::utilKeys::RFLOOR:
-					setConsoleColor((char)GameConfig::colors::LIGHTBLUE); //light blue
-					break;
+					case (char)GameConfig::utilKeys::LFLOOR:
+					case (char)GameConfig::utilKeys::RFLOOR:
+						setConsoleColor((char)GameConfig::colors::LIGHTBLUE); //light blue
+						break;
 
-				case (char)GameConfig::utilKeys::EDGE:
-					setConsoleColor((char)GameConfig::colors::BLUE); // Blue
-					break;
+					case (char)GameConfig::utilKeys::EDGE:
+						setConsoleColor((char)GameConfig::colors::BLUE); // Blue
+						break;
 
-				case (char)GameConfig::utilKeys::PAULINE:
-					setConsoleColor((char)GameConfig::colors::GOLD); // gold
-					break;
+					case (char)GameConfig::utilKeys::PAULINE:
+						setConsoleColor((char)GameConfig::colors::GOLD); // gold
+						break;
 
-				default:
-					setConsoleColor((char)GameConfig::colors::WHITE); // Default console color
-					break;
+					default:
+						setConsoleColor((char)GameConfig::colors::WHITE); // Default console color
+						break;
+					}
 				}
+				// Print the character
+				cout << element;
 			}
-			// Print the character
-			cout << element;
+			cout << '\n';
 		}
-		cout << '\n';
-	}
 
-	cout << _currentMap[GameConfig::GAME_HEIGHT - 1]; // Print the last line
+		cout << _currentMap[GameConfig::GAME_HEIGHT - 1]; // Print the last line
 
-	if (_useColors)
-	{
-		setConsoleColor((char)GameConfig::colors::WHITE); // Reset to default color for printing mario and barrel
+		if (_useColors)
+		{
+			setConsoleColor((char)GameConfig::colors::WHITE); // Reset to default color for printing mario and barrel
+		}
 	}
 }
 
@@ -265,40 +268,55 @@ void Map::updateOriginMap(const Point& point, const char ch)
 
 void Map::drawLife(const Point& point, const int life) const // Draw life
 {
-	gotoxy(point.getX(), point.getY()); // go coord of life and draw '# ' loop of number of current lifes
-	cout << "Lives: ";
-	for (int i = 0; i < life; ++i)
+	if (!_isSilent)
 	{
-		cout << "@ ";
+		gotoxy(point.getX(), point.getY()); // go coord of life and draw '@ ' loop of number of current lifes
+		cout << "Lives: ";
+		for (int i = 0; i < life; ++i)
+		{
+			cout << "@ ";
+		}
 	}
+	
 }
 
 void Map::eraseLife(const Point& point, const int prevLife) const // Erase
 {
-	gotoxy(point.getX(), point.getY());
-	for (int i = 0; i < prevLife; ++i) // erase the previous life (draw '  ' loop of number of previous lifes)
+	if (!_isSilent)
 	{
-		cout << "  ";
+		gotoxy(point.getX(), point.getY());
+		for (int i = 0; i < prevLife; ++i) // erase the previous life (draw '  ' loop of number of previous lifes)
+		{
+			cout << "  ";
+		}
 	}
 }
 
 void Map::drawScore(const Point& point, const int score) const
 {
-	gotoxy(point.getX(), point.getY() + 1); // go coord of score and draw _score number of current score
-	cout << "Score: " << score;
-
+	if (!_isSilent)
+	{
+		gotoxy(point.getX(), point.getY() + 1); // go coord of score and draw _score number of current score
+		cout << "Score: " << score;
+	}
 }
 
 void Map::drawHammerUses(const Point& point, const int uses) const
 {
-	gotoxy(point.getX() + 13, point.getY() + 2); // deletes the prev number of uses 
-	cout << "  ";
-	gotoxy(point.getX(), point.getY() + 2);
-	cout << "P uses left: " << uses;
+	if (!_isSilent)
+	{
+		gotoxy(point.getX() + 13, point.getY() + 2); // deletes the prev number of uses 
+		cout << "  ";
+		gotoxy(point.getX(), point.getY() + 2);
+		cout << "P uses left: " << uses;
+	}
 }
 
 void Map::eraseHammerUses(const Point& point) const
 {
-	gotoxy(point.getX(), point.getY() + 2); // deletes the prev number of uses 
-	cout << "               ";
+	if (!_isSilent)
+	{
+		gotoxy(point.getX(), point.getY() + 2); // deletes the prev number of uses 
+		cout << "               ";
+	}
 }

@@ -10,15 +10,17 @@ class AutomaticGame: public Game
 private:
 
 	bool _isSilent = false;
+	bool _isValid = true;
 
-	void run() override;
-	void reportResultError(const std::string& message, const std::string& filename, size_t iteration);
-	void loadValidScreen();
+	virtual void run() override;
+	void reportResultError(const string& message, const string& filename, size_t iteration);
+	void loadValidGame();
+	void loadInValidGame();
 
 public:
-	AutomaticGame(bool isSilent) : _isSilent(isSilent) {}
+	AutomaticGame(bool isSilent) : _isSilent(isSilent), _isValid(true) {}
 	virtual ~AutomaticGame() = default;
 
-	void menu() override;
+	virtual void menu() override;
 };
 

@@ -2,22 +2,27 @@
 
 Results Results::loadResults(const string& filename) 
 {
-	ifstream results_file(filename);
 	Results results;
-	size_t size;
-	size_t score;
-
-	results_file >> size;
-	while (!results_file.eof() && size-- != 0) 
+	ifstream results_file(filename);
+	if (!results_file.is_open())
+		results._doesExist = false;
+	else
 	{
-		size_t iteration;
-		int result;
-		results_file >> iteration >> result;
-		results.addResult(iteration, static_cast<ResultValue>(result));
-	}
-	results_file >> score;
-	results.addScore(score);
+		size_t size;
+		size_t score;
 
+		results_file >> size;
+		while (!results_file.eof() && size-- != 0)
+		{
+			size_t iteration;
+			int result;
+			results_file >> iteration >> result;
+			results.addResult(iteration, static_cast<ResultValue>(result));
+		}
+		results_file >> score;
+		results.addScore(score);
+	}
+	results_file.close();
 	return results;
 }
 

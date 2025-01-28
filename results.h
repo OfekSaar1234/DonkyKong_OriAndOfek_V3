@@ -10,7 +10,7 @@ public:
 	enum ResultValue { gotHit, rescudedPauline, noResult, gameOver };
 
 private:
-
+    bool _doesExist = true;
 	list<pair<size_t, ResultValue>> _results; // pair: iteration, result
 	size_t _score = 0;
 
@@ -34,4 +34,5 @@ public:
 
 	bool isFinishedBy(size_t iteration) const {return _results.empty() || _results.back().first <= iteration;}
 	size_t getNextGotHitIteration() const;
+	bool getDoesExist() const { return _doesExist; }
 };

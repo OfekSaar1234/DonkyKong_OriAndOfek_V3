@@ -81,7 +81,7 @@ void ManualGame::run()
 		{
 			map.reset();   // Reset map to initial state
 			map.enableColors(useColors); // Enable or disable colors based on user input
-			map.print(/*_isSilent*/);   // Print the map
+			map.print();   // Print the map
 
 			random_seed = static_cast<long>(chrono::system_clock::now().time_since_epoch().count());
 
@@ -627,7 +627,8 @@ void ManualGame::InstructionsScreen()
 	clrscr(); // Clear the screen when resuming
 
 	// instructions layout screen
-	const char* instructionScreen[GameConfig::GAME_HEIGHT] = {
+	const char* instructionScreen[GameConfig::GAME_HEIGHT] = 
+	{
 		"QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ", // 0
 		"Q                                                                              Q", // 1
 		"Q                                                                              Q", // 2

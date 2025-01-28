@@ -2,18 +2,23 @@
 
 void Enemy::draw(char ch) const // Draws the enemy at its current position
 {
-    int ghostX = _position.getX();
-    int ghostY = _position.getY();
-    gotoxy(ghostX, ghostY); // Move cursor to the enemy's position
-    cout << ch; // Display the character representing the enemy (e.g., ghost)
+    if (!_pMap->getIsSilent())
+    {
+        int ghostX = _position.getX();
+        int ghostY = _position.getY();
+        gotoxy(ghostX, ghostY); // Move cursor to the enemy's position
+        cout << ch; // Display the character representing the enemy (e.g., ghost)
+    }
 }
 
 void Enemy::erase() const // Erase the enemy from the map by restoring original character
 {
     char originalChar = _pMap->getCharOriginalMap(_position); // Get the original character at the enemy's position
-    gotoxy(_position.getX(), _position.getY()); // Move the cursor to the enemy's position
-    cout << originalChar; // Print the original character to restore the map
-
+    if (!_pMap->getIsSilent())
+    {
+        gotoxy(_position.getX(), _position.getY()); // Move the cursor to the enemy's position
+        cout << originalChar; // Print the original character to restore the map
+    }
     _pMap->updateCurrMap(_position, originalChar); // Update the current map with the original character
 }
 
